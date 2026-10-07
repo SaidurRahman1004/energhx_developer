@@ -10,6 +10,7 @@ class DashedBorderContainer extends StatelessWidget {
   final Color? backgroundColor;
   final double? height;
   final double? width;
+  final EdgeInsetsGeometry? padding;
   final VoidCallback? onTap;
 
   const DashedBorderContainer({
@@ -23,6 +24,7 @@ class DashedBorderContainer extends StatelessWidget {
     this.backgroundColor,
     this.height,
     this.width,
+    this.padding,
     this.onTap,
   });
 
@@ -33,6 +35,7 @@ class DashedBorderContainer extends StatelessWidget {
       child: Container(
         height: height,
         width: width ?? double.infinity,
+        padding: padding,
         decoration: BoxDecoration(
           color: backgroundColor ?? Colors.white,
           borderRadius: BorderRadius.circular(borderRadius),

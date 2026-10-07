@@ -34,6 +34,12 @@ class OtpVerificationView extends GetView<AuthController> {
       ),
     );
 
+    final errorPinTheme = defaultPinTheme.copyWith(
+      decoration: defaultPinTheme.decoration?.copyWith(
+        border: Border.all(color: AppColors.error, width: 1.2),
+      ),
+    );
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
@@ -57,7 +63,19 @@ class OtpVerificationView extends GetView<AuthController> {
                         controller: controller.otpController,
                         defaultPinTheme: defaultPinTheme,
                         focusedPinTheme: focusedPinTheme,
+                        errorPinTheme: errorPinTheme,
                         separatorBuilder: (index) => SizedBox(width: 14.w),
+                        validator: (s) {
+                          if (s == null || s.length < 4) {
+                            return 'Please enter 4-digit code';
+                          }
+                          return null;
+                        },
+                        errorTextStyle: GoogleFonts.plusJakartaSans(
+                          fontSize: 12.sp,
+                          color: AppColors.error,
+                          fontWeight: FontWeight.w500,
+                        ),
                         onCompleted: (pin) {
                           // Auto ready on complete
                         },

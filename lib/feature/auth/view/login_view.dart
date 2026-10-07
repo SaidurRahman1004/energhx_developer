@@ -9,11 +9,20 @@ import '../../../core/widgets/custom_button.dart';
 import '../../../core/widgets/custom_text_field.dart';
 import '../controller/auth_controller.dart';
 
-class LoginView extends GetView<AuthController> {
+class LoginView extends StatefulWidget {
   const LoginView({super.key});
 
   @override
+  State<LoginView> createState() => _LoginViewState();
+}
+
+class _LoginViewState extends State<LoginView> {
+  final _formKey = GlobalKey<FormState>();
+
+  @override
   Widget build(BuildContext context) {
+    final controller = Get.find<AuthController>();
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
@@ -51,31 +60,41 @@ class LoginView extends GetView<AuthController> {
                         ),
                       ),
                       SizedBox(height: 36.h),
-                      // Email Field
-                      CustomTextField(
-                        label: 'Email',
-                        hintText: 'Enter your email here',
-                        controller: controller.emailController,
-                        keyboardType: TextInputType.emailAddress,
-                      ),
-                      SizedBox(height: 18.h),
-                      // Password Field
-                      Obx(
-                        () => CustomTextField(
-                          label: 'Password',
-                          hintText: 'Enter your password here',
-                          controller: controller.passwordController,
-                          obscureText: controller.isPasswordHidden.value,
-                          suffixIcon: IconButton(
-                            icon: Icon(
-                              controller.isPasswordHidden.value
-                                  ? Icons.visibility_off_outlined
-                                  : Icons.visibility_outlined,
-                              size: 22.sp,
-                              color: AppColors.textMuted,
+                      // Form with validators
+                      Form(
+                        key: _formKey,
+                        child: Column(
+                          children: [
+                            // Email Field
+                            CustomTextField(
+                              label: 'Email',
+                              hintText: 'Enter your email here',
+                              controller: controller.emailController,
+                              keyboardType: TextInputType.emailAddress,
+                              validator: controller.validateEmail,
                             ),
-                            onPressed: controller.togglePasswordVisibility,
-                          ),
+                            SizedBox(height: 18.h),
+                            // Password Field
+                            Obx(
+                              () => CustomTextField(
+                                label: 'Password',
+                                hintText: 'Enter your password here',
+                                controller: controller.passwordController,
+                                obscureText: controller.isPasswordHidden.value,
+                                validator: controller.validatePassword,
+                                suffixIcon: IconButton(
+                                  icon: Icon(
+                                    controller.isPasswordHidden.value
+                                        ? Icons.visibility_off_outlined
+                                        : Icons.visibility_outlined,
+                                    size: 22.sp,
+                                    color: AppColors.textMuted,
+                                  ),
+                                  onPressed: controller.togglePasswordVisibility,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                       SizedBox(height: 8.h),
@@ -103,7 +122,7 @@ class LoginView extends GetView<AuthController> {
                         text: 'Log In',
                         height: 54.h,
                         borderRadius: 28.r,
-                        onPressed: controller.login,
+                        onPressed: () => controller.login(_formKey),
                       ),
                       const Spacer(),
                       // Sign Up Footer Link
@@ -121,7 +140,13 @@ class LoginView extends GetView<AuthController> {
                               ),
                             ),
                             GestureDetector(
-                              onTap: () => Get.toNamed(AppRoutes.signUp),
+                              onTap: () {
+                                if (Get.previousRoute == AppRoutes.signUp) {
+                                  Get.back();
+                                } else {
+                                  Get.toNamed(AppRoutes.signUp);
+                                }
+                              },
                               child: Text(
                                 'Sign up',
                                 style: GoogleFonts.plusJakartaSans(

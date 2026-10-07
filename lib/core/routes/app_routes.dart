@@ -22,6 +22,10 @@ class AppRoutes {
   static const String experience = '/experience';
   static const String settings = '/settings';
 
+  // Quiz Flow
+  static const String quizzes = '/quizzes';
+  static const String quizDetail = '/quiz-detail';
+
   // Settings & Profile Sub-screens
   static const String editProfile = '/edit-profile';
   static const String changePassword = '/change-password';

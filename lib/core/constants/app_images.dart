@@ -17,8 +17,12 @@ class AppImages {
   static const String windBanner = '$basePath/wind_banner.png';
   static const String biomassBanner = '$basePath/biomass_banner.png';
   static const String powerCourse = '$basePath/power_course.png';
+  static const String programCardBanner = '$basePath/program_card_banner.png';
 
   // Avatars
   static const String userAvatar = '$basePath/user_avatar.png';
   static const String homeAvatar = '$basePath/home_avatar.png';
+
+  // Quiz
+  static const String quizBanner = '$basePath/quiz_banner.jpg';
 }

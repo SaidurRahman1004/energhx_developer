@@ -17,6 +17,9 @@ import '../../feature/onboarding/view/onboarding_view.dart';
 import '../../feature/programs/controller/programs_controller.dart';
 import '../../feature/programs/view/course_details_view.dart';
 import '../../feature/programs/view/program_details_view.dart';
+import '../../feature/quiz/controller/quiz_controller.dart';
+import '../../feature/quiz/view/quiz_detail_view.dart';
+import '../../feature/quiz/view/quiz_list_view.dart';
 import '../../feature/settings/controller/settings_controller.dart';
 import '../../feature/settings/view/change_password_view.dart';
 import '../../feature/settings/view/edit_profile_view.dart';
@@ -124,6 +127,20 @@ class AppPages {
           () => ProgramsController(),
           fenix: true,
         );
+      }),
+    ),
+    GetPage(
+      name: AppRoutes.quizzes,
+      page: () => const QuizListView(),
+      binding: BindingsBuilder(() {
+        Get.lazyPut<QuizController>(() => QuizController(), fenix: true);
+      }),
+    ),
+    GetPage(
+      name: AppRoutes.quizDetail,
+      page: () => const QuizDetailView(),
+      binding: BindingsBuilder(() {
+        Get.lazyPut<QuizController>(() => QuizController(), fenix: true);
       }),
     ),
     GetPage(

@@ -89,7 +89,16 @@ class CustomTextField extends StatelessWidget {
             ),
             errorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8.r),
-              borderSide: const BorderSide(color: AppColors.error, width: 1.0),
+              borderSide: const BorderSide(color: AppColors.error, width: 1.2),
+            ),
+            focusedErrorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8.r),
+              borderSide: const BorderSide(color: AppColors.error, width: 1.5),
+            ),
+            errorStyle: GoogleFonts.plusJakartaSans(
+              fontSize: 12.sp,
+              color: AppColors.error,
+              fontWeight: FontWeight.w500,
             ),
           ),
         ),

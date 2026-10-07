@@ -5,6 +5,19 @@ import 'package:image_picker/image_picker.dart';
 import '../../../core/routes/app_routes.dart';
 
 class AuthController extends GetxController {
+  // Form Keys for full validation
+  final loginFormKey = GlobalKey<FormState>();
+  final forgotPasswordFormKey = GlobalKey<FormState>();
+  final otpFormKey = GlobalKey<FormState>();
+  final setNewPasswordFormKey = GlobalKey<FormState>();
+  final signUpFormKey = GlobalKey<FormState>();
+
+  // Sign Up Dropdown & Photo Error Observables
+  final sexError = RxnString();
+  final countryError = RxnString();
+  final provinceError = RxnString();
+  final photoError = RxnString();
+
   // Login Controllers
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
@@ -89,14 +102,54 @@ class AuthController extends GetxController {
     });
   }
 
-  void login() {
-    // API logic will be plugged here cleanly
-    Get.offAllNamed(AppRoutes.dashboard);
+  // Custom Validation Logic
+  String? validateEmail(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return 'Email is required';
+    }
+    final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+    if (!emailRegex.hasMatch(value.trim())) {
+      return 'Please enter a valid email address';
+    }
+    return null;
   }
 
-  void sendResetCode() {
-    startOtpTimer();
-    Get.toNamed(AppRoutes.otpVerification);
+  String? validatePassword(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Password is required';
+    }
+    if (value.length < 6) {
+      return 'Password must be at least 6 characters';
+    }
+    return null;
+  }
+
+  String? validateRequired(String? value, String fieldName) {
+    if (value == null || value.trim().isEmpty) {
+      return '$fieldName is required';
+    }
+    return null;
+  }
+
+  void login([GlobalKey<FormState>? formKey]) {
+    final isFormValid = (formKey != null)
+        ? (formKey.currentState?.validate() ?? false)
+        : (loginFormKey.currentState?.validate() ?? false);
+
+    if (isFormValid) {
+      Get.offAllNamed(AppRoutes.dashboard);
+    }
+  }
+
+  void sendResetCode([GlobalKey<FormState>? formKey]) {
+    final isFormValid = (formKey != null)
+        ? (formKey.currentState?.validate() ?? false)
+        : (forgotPasswordFormKey.currentState?.validate() ?? false);
+
+    if (isFormValid) {
+      startOtpTimer();
+      Get.toNamed(AppRoutes.otpVerification);
+    }
   }
 
   void resendOtp() {
@@ -107,16 +160,75 @@ class AuthController extends GetxController {
   }
 
   void verifyOtp() {
+    if (otpController.text.trim().length != 4) {
+      Get.snackbar(
+        'Incomplete Code',
+        'Please enter all 4 digits of the verification code',
+        backgroundColor: Colors.red.shade600,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,
+        margin: const EdgeInsets.all(16),
+      );
+      return;
+    }
     Get.toNamed(AppRoutes.setNewPassword);
   }
 
-  void setNewPassword() {
-    Get.offAllNamed(AppRoutes.login);
+  void setNewPassword([GlobalKey<FormState>? formKey]) {
+    final isFormValid = (formKey != null)
+        ? (formKey.currentState?.validate() ?? false)
+        : (setNewPasswordFormKey.currentState?.validate() ?? false);
+
+    if (isFormValid) {
+      if (newPasswordController.text != confirmPasswordController.text) {
+        Get.snackbar(
+          'Mismatch',
+          'Passwords do not match',
+          backgroundColor: Colors.red.shade600,
+          colorText: Colors.white,
+          snackPosition: SnackPosition.BOTTOM,
+          margin: const EdgeInsets.all(16),
+        );
+        return;
+      }
+      Get.offAllNamed(AppRoutes.login);
+    }
   }
 
-  void register() {
-    // API registration logic
-    Get.offAllNamed(AppRoutes.dashboard);
+  void register([GlobalKey<FormState>? formKey]) {
+    bool isCustomValid = true;
+
+    // Validate Sex
+    if (selectedSex.value == 'Choose sex' || selectedSex.value.isEmpty) {
+      sexError.value = 'Please choose your sex';
+      isCustomValid = false;
+    } else {
+      sexError.value = null;
+    }
+
+    // Validate Country
+    if (selectedCountry.value == 'Choose country' || selectedCountry.value.isEmpty) {
+      countryError.value = 'Please choose your country';
+      isCustomValid = false;
+    } else {
+      countryError.value = null;
+    }
+
+    // Validate Province
+    if (selectedProvince.value == 'Choose province' || selectedProvince.value.isEmpty) {
+      provinceError.value = 'Please choose your province';
+      isCustomValid = false;
+    } else {
+      provinceError.value = null;
+    }
+
+    final isFormValid = (formKey != null)
+        ? (formKey.currentState?.validate() ?? false)
+        : (signUpFormKey.currentState?.validate() ?? false);
+
+    if (isFormValid && isCustomValid) {
+      Get.offAllNamed(AppRoutes.dashboard);
+    }
   }
 
   @override

@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_colors.dart';
 
 class ProgramCard extends StatelessWidget {
   final String title;
+  final String description;
+  final String price;
   final String tag;
   final String imageUrl;
   final VoidCallback onTap;
@@ -10,7 +14,10 @@ class ProgramCard extends StatelessWidget {
   const ProgramCard({
     super.key,
     required this.title,
-    this.tag = 'BASIC',
+    this.description =
+        'This Programme provides the theoretical and practical fundam for prospective developers who aspire to get certified as...',
+    this.price = '\$11,500',
+    this.tag = 'DEVELOPER',
     required this.imageUrl,
     required this.onTap,
   });
@@ -20,16 +27,16 @@ class ProgramCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        margin: const EdgeInsets.only(bottom: 16),
+        margin: EdgeInsets.only(bottom: 18.h),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppColors.border),
+          borderRadius: BorderRadius.circular(16.r),
+          border: Border.all(color: const Color(0xFFE2E8F0), width: 1.0),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.03),
+              color: Colors.black.withValues(alpha: 0.04),
               blurRadius: 10,
-              offset: const Offset(0, 4),
+              offset: const Offset(0, 3),
             ),
           ],
         ),
@@ -37,15 +44,15 @@ class ProgramCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Image header
-            Container(
-              height: 140,
-              width: double.infinity,
-              color: const Color(0xFFE2E8F0),
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  imageUrl.startsWith('assets/')
+            // Image Header
+            Padding(
+              padding: EdgeInsets.fromLTRB(12.w, 12.h, 12.w, 0),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(12.r),
+                child: SizedBox(
+                  height: 145.h,
+                  width: double.infinity,
+                  child: imageUrl.startsWith('assets/')
                       ? Image.asset(
                           imageUrl,
                           fit: BoxFit.cover,
@@ -66,66 +73,75 @@ class ProgramCard extends StatelessWidget {
                             ),
                           ),
                         ),
-                  // Dark gradient overlay for bottom text on image
-                  Positioned(
-                    bottom: 0,
-                    left: 0,
-                    right: 0,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            Colors.black.withValues(alpha: 0.75),
-                            Colors.black.withValues(alpha: 0.1),
-                          ],
-                          begin: Alignment.bottomCenter,
-                          end: Alignment.topCenter,
-                        ),
-                      ),
-                      child: Text(
-                        title,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ),
-                ],
+                ),
               ),
             ),
+
+            // Card Body
             Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: EdgeInsets.fromLTRB(16.w, 14.h, 16.w, 16.h),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // Title
                   Text(
                     title,
-                    style: const TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.bold,
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.w700,
                       color: AppColors.textPrimary,
                     ),
                   ),
-                  const SizedBox(height: 8),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: AppColors.primarySubtle,
-                      borderRadius: BorderRadius.circular(6),
+                  SizedBox(height: 6.h),
+
+                  // Description
+                  Text(
+                    description,
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 12.sp,
+                      fontWeight: FontWeight.w400,
+                      color: const Color(0xFF64748B),
+                      height: 1.4,
                     ),
-                    child: Text(
-                      tag,
-                      style: const TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.primary,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  SizedBox(height: 14.h),
+
+                  // Bottom Row: Price on left, Tag on right
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text(
+                        price,
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.primary,
+                        ),
                       ),
-                    ),
+                      Container(
+                        padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 6.h),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF0FDF4),
+                          borderRadius: BorderRadius.circular(6.r),
+                          border: Border.all(
+                            color: const Color(0xFFBBF7D0),
+                            width: 1.0,
+                          ),
+                        ),
+                        child: Text(
+                          tag,
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 11.sp,
+                            fontWeight: FontWeight.w700,
+                            color: const Color(0xFF2563EB),
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
