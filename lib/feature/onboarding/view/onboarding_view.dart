@@ -29,27 +29,26 @@ class OnboardingView extends GetView<OnboardingController> {
             ),
           ),
 
-          // 2. Glassmorphic bottom container matching Figma Frame 2147229272
-          // Width: 375, Height: 258, Radius: 32px, Fill: #FFFFFF (10%), Blur effect
-          Positioned(
-            left: 16.w,
-            right: 16.w,
-            bottom: (bottomPadding > 0 ? bottomPadding + 10.h : 24.h),
+          // 2. Full-width bottom sheet / container attached to bottom edges
+          Align(
+            alignment: Alignment.bottomCenter,
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(32.r),
+              borderRadius: BorderRadius.vertical(top: Radius.circular(32.r)),
               child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 25, sigmaY: 25),
+                filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
                 child: Container(
                   width: double.infinity,
-                  padding: EdgeInsets.symmetric(
-                    horizontal: 20.w,
-                    vertical: 24.h,
+                  padding: EdgeInsets.fromLTRB(
+                    24.w,
+                    32.h,
+                    24.w,
+                    20.h + (bottomPadding > 0 ? bottomPadding : 16.h),
                   ),
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.10),
-                    borderRadius: BorderRadius.circular(32.r),
+                    color: Colors.white.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.vertical(top: Radius.circular(32.r)),
                     border: Border.all(
-                      color: Colors.white.withValues(alpha: 0.25),
+                      color: Colors.white.withValues(alpha: 0.20),
                       width: 1.0,
                     ),
                   ),
@@ -62,13 +61,13 @@ class OnboardingView extends GetView<OnboardingController> {
                         'Accelerate Clean Energy',
                         textAlign: TextAlign.center,
                         style: GoogleFonts.plusJakartaSans(
-                          fontSize: 24.sp,
+                          fontSize: 26.sp,
                           fontWeight: FontWeight.w700,
                           color: Colors.white,
                           letterSpacing: -0.3,
                         ),
                       ),
-                      SizedBox(height: 10.h),
+                      SizedBox(height: 12.h),
 
                       // Subtitle
                       Text(
@@ -77,11 +76,11 @@ class OnboardingView extends GetView<OnboardingController> {
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 13.sp,
                           fontWeight: FontWeight.w400,
-                          color: Colors.white.withValues(alpha: 0.85),
+                          color: const Color(0xFFCBD5E1),
                           height: 1.45,
                         ),
                       ),
-                      SizedBox(height: 24.h),
+                      SizedBox(height: 28.h),
 
                       // Interactive Swipe Button (Left to Right drag)
                       SwipeToOptimizeButton(
