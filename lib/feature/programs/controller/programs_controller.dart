@@ -4,6 +4,8 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:video_player/video_player.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/services/certificate_service.dart';
+import '../../../core/services/video_cache_service.dart';
 
 class LessonItem {
   final String title;
@@ -33,6 +35,8 @@ class ProgramsController extends GetxController {
 
   // Course completion state (After Enrolement (3).png)
   final isCourseCompleted = false.obs;
+  final isDownloadingCert = false.obs;
+  final lastDownloadedCertPath = RxnString();
 
   // Video Player state
   VideoPlayerController? videoPlayerController;
@@ -40,29 +44,17 @@ class ProgramsController extends GetxController {
   final isVideoPlaying = false.obs;
   final isVideoLoading = false.obs;
 
-  // Basic Content Lessons (from Figma After Enrolement (1).png)
+  // Fast-streaming & cacheable lesson videos
   final List<LessonItem> basicLessons = const [
     LessonItem(
       title: 'Introduction to Solar Systems',
       duration: '08:24',
       videoUrl:
-          'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+          'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
     ),
     LessonItem(
       title: 'Photovoltaic Panel Design',
       duration: '12:10',
-      videoUrl:
-          'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
-    ),
-    LessonItem(
-      title: 'Installation & Wiring',
-      duration: '15:45',
-      videoUrl:
-          'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
-    ),
-    LessonItem(
-      title: 'Installation & Wiring',
-      duration: '15:45',
       videoUrl:
           'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4',
     ),
@@ -73,50 +65,61 @@ class ProgramsController extends GetxController {
           'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4',
     ),
     LessonItem(
-      title: 'Installation & Wiring',
-      duration: '15:45',
+      title: 'Inverter Configuration & Grid Connection',
+      duration: '14:20',
       videoUrl:
           'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyBlazes.mp4',
+    ),
+    LessonItem(
+      title: 'Safety, Grounding & Standards',
+      duration: '11:15',
+      videoUrl:
+          'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4',
+    ),
+    LessonItem(
+      title: 'Testing, Commissioning & Maintenance',
+      duration: '16:30',
+      videoUrl:
+          'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/WeAreGoingOnBullrun.mp4',
     ),
   ];
 
-  // Main Content Lessons (from Figma After Enrolement (2).png)
   final List<LessonItem> mainContentLessons = const [
     LessonItem(
-      title: 'Introduction to Solar Systems',
-      duration: '08:24',
-      videoUrl:
-          'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
-    ),
-    LessonItem(
-      title: 'Photovoltaic Panel Design',
-      duration: '12:10',
-      videoUrl:
-          'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
-    ),
-    LessonItem(
-      title: 'Installation & Wiring',
-      duration: '15:45',
+      title: 'Solar Cell Physics & Chemistry',
+      duration: '10:15',
       videoUrl:
           'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
     ),
     LessonItem(
-      title: 'Installation & Wiring',
-      duration: '15:45',
+      title: 'MPPT Tracking & DC-DC Optimization',
+      duration: '14:40',
       videoUrl:
           'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4',
     ),
     LessonItem(
-      title: 'Installation & Wiring',
-      duration: '15:45',
+      title: 'Commercial Three-Phase Interconnection',
+      duration: '18:50',
       videoUrl:
           'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4',
     ),
     LessonItem(
-      title: 'Installation & Wiring',
-      duration: '15:45',
+      title: 'Battery Energy Storage System (BESS)',
+      duration: '15:30',
       videoUrl:
           'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyBlazes.mp4',
+    ),
+    LessonItem(
+      title: 'Protection Relays & Anti-Islanding',
+      duration: '12:05',
+      videoUrl:
+          'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4',
+    ),
+    LessonItem(
+      title: 'SCADA Monitoring & Performance Ratio',
+      duration: '13:45',
+      videoUrl:
+          'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/WeAreGoingOnBullrun.mp4',
     ),
   ];
 
@@ -162,15 +165,34 @@ class ProgramsController extends GetxController {
     loadVideo(currentLessons[index].videoUrl);
   }
 
+  /// Loads video using local disk caching for high performance and smooth playback.
   Future<void> loadVideo(String url) async {
     try {
       isVideoLoading.value = true;
       final oldController = videoPlayerController;
       videoPlayerController = null;
       isVideoInitialized.value = false;
-      await oldController?.dispose();
+      if (oldController != null) {
+        try {
+          await oldController.pause();
+          await oldController.dispose();
+        } catch (_) {}
+      }
 
-      final controller = VideoPlayerController.networkUrl(Uri.parse(url));
+      // Check if video is already cached on device disk
+      final cachedFile = await VideoCacheService.getCachedVideoFile(url);
+      VideoPlayerController controller;
+
+      if (cachedFile != null) {
+        debugPrint('[ProgramsController] Playing from cache: ${cachedFile.path}');
+        controller = VideoPlayerController.file(cachedFile);
+      } else {
+        debugPrint('[ProgramsController] Streaming and downloading to cache: $url');
+        controller = VideoPlayerController.networkUrl(Uri.parse(url));
+        // Cache in background for instant future loads
+        VideoCacheService.cacheVideo(url);
+      }
+
       videoPlayerController = controller;
       await controller.initialize();
       controller.setLooping(true);
@@ -178,7 +200,7 @@ class ProgramsController extends GetxController {
       isVideoInitialized.value = true;
       isVideoPlaying.value = true;
     } catch (e) {
-      debugPrint('[ProgramsController] Video load error: $e');
+      debugPrint('[ProgramsController] Video load caught error: $e');
       isVideoInitialized.value = false;
       isVideoPlaying.value = false;
     } finally {
@@ -223,18 +245,58 @@ class ProgramsController extends GetxController {
     );
   }
 
-  void downloadCertificate() {
-    Get.snackbar(
-      'Certificate Downloaded',
-      'Your certificate has been downloaded to your device.',
-      snackPosition: SnackPosition.BOTTOM,
-      backgroundColor: AppColors.primary,
-      colorText: Colors.white,
-      icon: const Icon(Icons.workspace_premium, color: Colors.white),
-      margin: const EdgeInsets.all(16),
-      borderRadius: 12,
-      duration: const Duration(seconds: 3),
-    );
+  /// Generates the actual PDF certificate and saves it to device storage.
+  Future<void> downloadCertificate() async {
+    if (isDownloadingCert.value) return;
+
+    try {
+      isDownloadingCert.value = true;
+
+      final filePath = await CertificateService.generateAndSaveCertificate(
+        studentName: 'Zahirul Piash',
+        programTitle: 'Solar Energy System Developer',
+      );
+
+      lastDownloadedCertPath.value = filePath;
+
+      Get.snackbar(
+        'Certificate Downloaded',
+        'Saved to device: $filePath',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: AppColors.primary,
+        colorText: Colors.white,
+        icon: const Icon(Icons.workspace_premium, color: Colors.white),
+        margin: const EdgeInsets.all(16),
+        borderRadius: 12,
+        duration: const Duration(seconds: 4),
+        mainButton: TextButton(
+          onPressed: () => CertificateService.openCertificate(filePath),
+          child: const Text(
+            'OPEN',
+            style: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              decoration: TextDecoration.underline,
+            ),
+          ),
+        ),
+      );
+
+      // Also trigger open file so the user immediately sees it
+      await CertificateService.openCertificate(filePath);
+    } catch (e) {
+      debugPrint('[ProgramsController] Certificate download error: $e');
+      Get.snackbar(
+        'Download Error',
+        'Failed to save certificate: $e',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.redAccent,
+        colorText: Colors.white,
+        margin: const EdgeInsets.all(16),
+      );
+    } finally {
+      isDownloadingCert.value = false;
+    }
   }
 
   void openReviewModal() {

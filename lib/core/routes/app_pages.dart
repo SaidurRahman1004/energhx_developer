@@ -23,6 +23,8 @@ import '../../feature/quiz/view/quiz_list_view.dart';
 import '../../feature/settings/controller/settings_controller.dart';
 import '../../feature/settings/view/change_password_view.dart';
 import '../../feature/settings/view/edit_profile_view.dart';
+import '../../feature/notifications/controller/notifications_controller.dart';
+import '../../feature/notifications/view/notifications_view.dart';
 import '../../feature/splash/controller/splash_controller.dart';
 import '../../feature/splash/view/splash_view.dart';
 import 'app_routes.dart';
@@ -169,6 +171,16 @@ class AppPages {
       binding: BindingsBuilder(() {
         Get.lazyPut<ServiceAgreementController>(
           () => ServiceAgreementController(),
+          fenix: true,
+        );
+      }),
+    ),
+    GetPage(
+      name: AppRoutes.notifications,
+      page: () => const NotificationsView(),
+      binding: BindingsBuilder(() {
+        Get.lazyPut<NotificationsController>(
+          () => NotificationsController(),
           fenix: true,
         );
       }),

@@ -21,6 +21,7 @@ class AppRoutes {
   static const String courses = '/courses';
   static const String experience = '/experience';
   static const String settings = '/settings';
+  static const String notifications = '/notifications';
 
   // Quiz Flow
   static const String quizzes = '/quizzes';

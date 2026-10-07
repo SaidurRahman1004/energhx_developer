@@ -615,7 +615,7 @@ class CourseDetailsView extends GetView<ProgramsController> {
       children: [
         DashedBorderContainer(
           width: double.infinity,
-          padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 22.h),
+          padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 24.h),
           color: const Color(0xFFBCE7C6),
           backgroundColor: const Color(0xFFF6FCF7),
           borderRadius: 16.r,
@@ -623,10 +623,10 @@ class CourseDetailsView extends GetView<ProgramsController> {
             children: [
               Icon(
                 Icons.workspace_premium_outlined,
-                size: 38.sp,
+                size: 40.sp,
                 color: AppColors.primary,
               ),
-              SizedBox(height: 10.h),
+              SizedBox(height: 12.h),
               Text(
                 'Course Completed!',
                 style: GoogleFonts.plusJakartaSans(
@@ -635,23 +635,61 @@ class CourseDetailsView extends GetView<ProgramsController> {
                   color: AppColors.textPrimary,
                 ),
               ),
-              SizedBox(height: 6.h),
-              Text(
-                'You have finished Solar Energy System Developer. Download your certificate below.',
-                textAlign: TextAlign.center,
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 12.5.sp,
-                  color: const Color(0xFF64748B),
-                  height: 1.4,
+              SizedBox(height: 8.h),
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16.w),
+                child: Text(
+                  'You have finished Solar Energy System Developer. Download your certificate below.',
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 12.5.sp,
+                    color: const Color(0xFF64748B),
+                    height: 1.45,
+                  ),
                 ),
               ),
-              SizedBox(height: 18.h),
-              CustomButton(
-                text: 'Get Certificate',
-                icon: const Icon(Icons.download_rounded, color: Colors.white, size: 20),
-                height: 48.h,
-                borderRadius: 24.r,
-                onPressed: controller.downloadCertificate,
+              SizedBox(height: 20.h),
+              Obx(
+                () => SizedBox(
+                  width: double.infinity,
+                  height: 48.h,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(24.r),
+                      ),
+                    ),
+                    onPressed: controller.isDownloadingCert.value
+                        ? null
+                        : controller.downloadCertificate,
+                    child: controller.isDownloadingCert.value
+                        ? const SizedBox(
+                            width: 22,
+                            height: 22,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          )
+                        : Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Icon(Icons.download_rounded, color: Colors.white, size: 20),
+                              SizedBox(width: 8.w),
+                              Text(
+                                'Get Certificate',
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontSize: 14.sp,
+                                  fontWeight: FontWeight.w700,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ],
+                          ),
+                  ),
+                ),
               ),
             ],
           ),

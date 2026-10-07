@@ -35,7 +35,6 @@ class DashedBorderContainer extends StatelessWidget {
       child: Container(
         height: height,
         width: width ?? double.infinity,
-        padding: padding,
         decoration: BoxDecoration(
           color: backgroundColor ?? Colors.white,
           borderRadius: BorderRadius.circular(borderRadius),
@@ -48,7 +47,10 @@ class DashedBorderContainer extends StatelessWidget {
             dashSpace: dashSpace,
             borderRadius: borderRadius,
           ),
-          child: child,
+          child: Padding(
+            padding: padding ?? const EdgeInsets.all(16.0),
+            child: child,
+          ),
         ),
       ),
     );

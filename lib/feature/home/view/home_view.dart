@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_icons.dart';
 import '../../../core/constants/app_images.dart';
+import '../../../core/routes/app_routes.dart';
 import '../controller/home_controller.dart';
 import 'widgets/overview_card.dart';
 
@@ -62,7 +63,7 @@ class HomeView extends GetView<HomeController> {
                   ),
                   const Spacer(),
                   GestureDetector(
-                    onTap: () {},
+                    onTap: () => Get.toNamed(AppRoutes.notifications),
                     child: Container(
                       width: 42.w,
                       height: 42.w,
@@ -70,13 +71,31 @@ class HomeView extends GetView<HomeController> {
                         color: const Color(0xFF2DAD00).withValues(alpha: 0.10),
                         borderRadius: BorderRadius.circular(81.r),
                       ),
-                      child: Center(
-                        child: Image.asset(
-                          AppIcons.homeBell,
-                          width: 42.w,
-                          height: 42.w,
-                          fit: BoxFit.contain,
-                        ),
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          Center(
+                            child: Image.asset(
+                              AppIcons.homeBell,
+                              width: 42.w,
+                              height: 42.w,
+                              fit: BoxFit.contain,
+                            ),
+                          ),
+                          Positioned(
+                            top: 9.w,
+                            right: 9.w,
+                            child: Container(
+                              width: 8.r,
+                              height: 8.r,
+                              decoration: BoxDecoration(
+                                color: AppColors.primary,
+                                shape: BoxShape.circle,
+                                border: Border.all(color: Colors.white, width: 1.5),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),

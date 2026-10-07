@@ -1,16 +1,22 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../../core/routes/app_routes.dart';
 
 class SettingsController extends GetxController {
   final userName = 'Zahirul Piash'.obs;
-  final userEmail = 'piash2215@gmail.com'.obs;
+  final userEmail = 'Pia2225@gmail.com'.obs;
+
+  // Profile Image
+  final profileImagePath = Rxn<String>();
+  final ImagePicker _picker = ImagePicker();
 
   // Edit Profile Form Controllers
   final firstNameController = TextEditingController(text: 'Zahirul');
   final lastNameController = TextEditingController(text: 'Piash');
   final otherNameController = TextEditingController();
-  final emailController = TextEditingController(text: 'piash2215@gmail.com');
+  final emailController = TextEditingController(text: 'Pia2225@gmail.com');
   final streetNumberController = TextEditingController();
   final streetAddressController = TextEditingController();
   final countryController = TextEditingController();
@@ -32,14 +38,214 @@ class SettingsController extends GetxController {
     isConfirmPasswordHidden.value = !isConfirmPasswordHidden.value;
   }
 
+  Future<void> pickImage(ImageSource source) async {
+    try {
+      final XFile? image = await _picker.pickImage(
+        source: source,
+        maxWidth: 1024,
+        maxHeight: 1024,
+        imageQuality: 85,
+      );
+
+      if (image != null) {
+        final file = File(image.path);
+        if (await file.exists()) {
+          profileImagePath.value = image.path;
+          Get.snackbar(
+            'Photo Updated',
+            'Profile photo has been changed successfully',
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: const Color(0xFF2DAD00),
+            colorText: Colors.white,
+            margin: const EdgeInsets.all(16),
+            duration: const Duration(seconds: 2),
+          );
+        }
+      }
+    } catch (e) {
+      debugPrint('Error picking image: $e');
+      Get.snackbar(
+        'Notice',
+        'Could not access the image picker: $e',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.redAccent,
+        colorText: Colors.white,
+        margin: const EdgeInsets.all(16),
+      );
+    }
+  }
+
+  void showImagePickerOptions(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => Container(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        child: SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Grab handle
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFE2E8F0),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'Change Profile Photo',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF0F172A),
+                ),
+              ),
+              const SizedBox(height: 20),
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: Container(
+                  width: 42,
+                  height: 42,
+                  decoration: const BoxDecoration(
+                    color: Color(0xFFE8F5E9),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.camera_alt_rounded,
+                    color: Color(0xFF2DAD00),
+                    size: 20,
+                  ),
+                ),
+                title: const Text(
+                  'Take Photo',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF1E293B),
+                  ),
+                ),
+                subtitle: const Text(
+                  'Use camera to capture a new photo',
+                  style: TextStyle(fontSize: 12, color: Color(0xFF94A3B8)),
+                ),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  pickImage(ImageSource.camera);
+                },
+              ),
+              const Divider(height: 1, color: Color(0xFFF1F5F9)),
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: Container(
+                  width: 42,
+                  height: 42,
+                  decoration: const BoxDecoration(
+                    color: Color(0xFFEFF6FF),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.photo_library_rounded,
+                    color: Color(0xFF2563EB),
+                    size: 20,
+                  ),
+                ),
+                title: const Text(
+                  'Choose from Gallery',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF1E293B),
+                  ),
+                ),
+                subtitle: const Text(
+                  'Select an existing image from device',
+                  style: TextStyle(fontSize: 12, color: Color(0xFF94A3B8)),
+                ),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  pickImage(ImageSource.gallery);
+                },
+              ),
+              Obx(
+                () {
+                  if (profileImagePath.value != null) {
+                    return Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Divider(height: 1, color: Color(0xFFF1F5F9)),
+                        ListTile(
+                          contentPadding: EdgeInsets.zero,
+                          leading: Container(
+                            width: 42,
+                            height: 42,
+                            decoration: const BoxDecoration(
+                              color: Color(0xFFFEE2E2),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.delete_outline_rounded,
+                              color: Color(0xFFEF4444),
+                              size: 20,
+                            ),
+                          ),
+                          title: const Text(
+                            'Remove Custom Photo',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: Color(0xFFEF4444),
+                            ),
+                          ),
+                          onTap: () {
+                            Navigator.pop(ctx);
+                            profileImagePath.value = null;
+                          },
+                        ),
+                      ],
+                    );
+                  }
+                  return const SizedBox.shrink();
+                },
+              ),
+              const SizedBox(height: 12),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   void saveProfile() {
     Get.back();
-    Get.snackbar('Success', 'Profile updated successfully');
+    Get.snackbar(
+      'Success',
+      'Profile updated successfully',
+      snackPosition: SnackPosition.BOTTOM,
+      backgroundColor: const Color(0xFF2DAD00),
+      colorText: Colors.white,
+      margin: const EdgeInsets.all(16),
+      duration: const Duration(seconds: 2),
+    );
   }
 
   void updatePassword() {
     Get.back();
-    Get.snackbar('Success', 'Password updated successfully');
+    Get.snackbar(
+      'Success',
+      'Password updated successfully',
+      snackPosition: SnackPosition.BOTTOM,
+      backgroundColor: const Color(0xFF2DAD00),
+      colorText: Colors.white,
+      margin: const EdgeInsets.all(16),
+      duration: const Duration(seconds: 2),
+    );
   }
 
   void logOut() {

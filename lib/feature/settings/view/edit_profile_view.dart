@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -24,41 +25,65 @@ class EditProfileView extends GetView<SettingsController> {
             children: [
               // Avatar with camera icon
               Center(
-                child: Stack(
-                  clipBehavior: Clip.none,
-                  children: [
-                    Container(
-                      width: 84.r,
-                      height: 84.r,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(color: const Color(0xFFEDF9F1), width: 3),
-                      ),
-                      child: ClipOval(
-                        child: Image.asset(
-                          AppImages.homeAvatar,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) => const CircleAvatar(
-                            backgroundColor: AppColors.primarySubtle,
-                            child: Icon(Icons.person, size: 48, color: AppColors.primary),
+                child: Obx(
+                  () => GestureDetector(
+                    onTap: () => controller.showImagePickerOptions(context),
+                    child: Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        Container(
+                          width: 86.r,
+                          height: 86.r,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            border: Border.all(color: const Color(0xFFEDF9F1), width: 3),
+                          ),
+                          child: ClipOval(
+                            child: controller.profileImagePath.value != null
+                                ? Image.file(
+                                    File(controller.profileImagePath.value!),
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (context, error, stackTrace) => Image.asset(
+                                      AppImages.userAvatar,
+                                      fit: BoxFit.cover,
+                                    ),
+                                  )
+                                : Image.asset(
+                                    AppImages.userAvatar,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (context, error, stackTrace) => const CircleAvatar(
+                                      backgroundColor: AppColors.primarySubtle,
+                                      child: Icon(Icons.person, size: 48, color: AppColors.primary),
+                                    ),
+                                  ),
                           ),
                         ),
-                      ),
-                    ),
-                    Positioned(
-                      bottom: 0,
-                      right: 0,
-                      child: Container(
-                        padding: EdgeInsets.all(6.r),
-                        decoration: BoxDecoration(
-                          color: AppColors.primary,
-                          shape: BoxShape.circle,
-                          border: Border.all(color: Colors.white, width: 2),
+                        Positioned(
+                          bottom: 0,
+                          right: 0,
+                          child: GestureDetector(
+                            onTap: () => controller.showImagePickerOptions(context),
+                            child: Container(
+                              padding: EdgeInsets.all(7.r),
+                              decoration: BoxDecoration(
+                                color: AppColors.primary,
+                                shape: BoxShape.circle,
+                                border: Border.all(color: Colors.white, width: 2),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withValues(alpha: 0.1),
+                                    blurRadius: 4,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
+                              ),
+                              child: Icon(Icons.camera_alt, color: Colors.white, size: 14.sp),
+                            ),
+                          ),
                         ),
-                        child: Icon(Icons.camera_alt, color: Colors.white, size: 14.sp),
-                      ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
               ),
               SizedBox(height: 24.h),
