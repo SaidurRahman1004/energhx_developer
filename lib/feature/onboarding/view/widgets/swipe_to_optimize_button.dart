@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/app_icons.dart';
 
 class SwipeToOptimizeButton extends StatefulWidget {
   final VoidCallback onSwipeComplete;
@@ -119,18 +120,14 @@ class _SwipeToOptimizeButtonState extends State<SwipeToOptimizeButton>
                 ),
               ),
 
-              // Right Double Chevron Indicator
+              // Right Triple Chevron Indicator from Figma (Second_screen_arrow_right2.png)
               Positioned(
-                right: 18.w,
-                child: const Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.keyboard_double_arrow_right_rounded,
-                      color: Color(0xFF94A3B8),
-                      size: 24,
-                    ),
-                  ],
+                right: 20.w,
+                child: Image.asset(
+                  AppIcons.secondScreenArrowRight2,
+                  width: 22.w,
+                  height: 14.h,
+                  fit: BoxFit.contain,
                 ),
               ),
 
@@ -160,11 +157,12 @@ class _SwipeToOptimizeButtonState extends State<SwipeToOptimizeButton>
                         ),
                       ],
                     ),
-                    child: const Center(
-                      child: Icon(
-                        Icons.arrow_forward_rounded,
-                        color: Colors.white,
-                        size: 24,
+                    child: Center(
+                      child: Image.asset(
+                        AppIcons.secondScreenArrowRight,
+                        width: handleSize,
+                        height: handleSize,
+                        fit: BoxFit.contain,
                       ),
                     ),
                   ),
