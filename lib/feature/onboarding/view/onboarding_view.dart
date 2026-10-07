@@ -29,33 +29,27 @@ class OnboardingView extends GetView<OnboardingController> {
             ),
           ),
 
-          // 2. Full-width bottom sheet / container attached to bottom edges
-          Align(
-            alignment: Alignment.bottomCenter,
+          // 2. Glassmorphic bottom container matching Figma Frame 2147229272
+          // Width: 375, Height: 258, Radius: 32px, Fill: #FFFFFF (10%), Blur effect
+          Positioned(
+            left: 16.w,
+            right: 16.w,
+            bottom: (bottomPadding > 0 ? bottomPadding + 10.h : 24.h),
             child: ClipRRect(
-              borderRadius: BorderRadius.vertical(top: Radius.circular(32.r)),
+              borderRadius: BorderRadius.circular(32.r),
               child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+                filter: ImageFilter.blur(sigmaX: 25, sigmaY: 25),
                 child: Container(
                   width: double.infinity,
-                  padding: EdgeInsets.fromLTRB(
-                    24.w,
-                    32.h,
-                    24.w,
-                    20.h + (bottomPadding > 0 ? bottomPadding : 16.h),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 20.w,
+                    vertical: 24.h,
                   ),
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        const Color(0xFF1E293B).withValues(alpha: 0.45),
-                        const Color(0xFF0F172A).withValues(alpha: 0.65),
-                      ],
-                    ),
-                    borderRadius: BorderRadius.vertical(top: Radius.circular(32.r)),
+                    color: Colors.white.withValues(alpha: 0.10),
+                    borderRadius: BorderRadius.circular(32.r),
                     border: Border.all(
-                      color: Colors.white.withValues(alpha: 0.20),
+                      color: Colors.white.withValues(alpha: 0.25),
                       width: 1.0,
                     ),
                   ),
@@ -68,13 +62,13 @@ class OnboardingView extends GetView<OnboardingController> {
                         'Accelerate Clean Energy',
                         textAlign: TextAlign.center,
                         style: GoogleFonts.plusJakartaSans(
-                          fontSize: 26.sp,
+                          fontSize: 24.sp,
                           fontWeight: FontWeight.w700,
                           color: Colors.white,
                           letterSpacing: -0.3,
                         ),
                       ),
-                      SizedBox(height: 12.h),
+                      SizedBox(height: 10.h),
 
                       // Subtitle
                       Text(
@@ -83,11 +77,11 @@ class OnboardingView extends GetView<OnboardingController> {
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 13.sp,
                           fontWeight: FontWeight.w400,
-                          color: const Color(0xFFCBD5E1),
+                          color: Colors.white.withValues(alpha: 0.85),
                           height: 1.45,
                         ),
                       ),
-                      SizedBox(height: 28.h),
+                      SizedBox(height: 24.h),
 
                       // Interactive Swipe Button (Left to Right drag)
                       SwipeToOptimizeButton(
