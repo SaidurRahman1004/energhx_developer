@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/constants/app_icons.dart';
 import '../../../core/constants/app_images.dart';
 import '../controller/home_controller.dart';
 import 'widgets/overview_card.dart';
@@ -59,19 +61,22 @@ class HomeView extends GetView<HomeController> {
                     ],
                   ),
                   const Spacer(),
-                  IconButton(
-                    onPressed: () {},
-                    icon: Container(
-                      padding: const EdgeInsets.all(8),
+                  GestureDetector(
+                    onTap: () {},
+                    child: Container(
+                      width: 42.w,
+                      height: 42.w,
                       decoration: BoxDecoration(
-                        color: AppColors.surface,
-                        shape: BoxShape.circle,
-                        border: Border.all(color: AppColors.border),
+                        color: const Color(0xFF2DAD00).withValues(alpha: 0.10),
+                        borderRadius: BorderRadius.circular(81.r),
                       ),
-                      child: const Icon(
-                        Icons.notifications_none_outlined,
-                        size: 20,
-                        color: AppColors.primary,
+                      child: Center(
+                        child: Image.asset(
+                          AppIcons.homeBell,
+                          width: 42.w,
+                          height: 42.w,
+                          fit: BoxFit.contain,
+                        ),
                       ),
                     ),
                   ),
