@@ -1,0 +1,133 @@
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import '../../../core/constants/app_colors.dart';
+import '../../../core/constants/app_images.dart';
+import '../controller/home_controller.dart';
+import 'widgets/overview_card.dart';
+
+class HomeView extends GetView<HomeController> {
+  const HomeView({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Header
+              Row(
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(20),
+                    child: Image.asset(
+                      AppImages.homeAvatar,
+                      width: 40,
+                      height: 40,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) => const CircleAvatar(
+                        radius: 20,
+                        backgroundColor: AppColors.primarySubtle,
+                        child: Icon(Icons.person, color: AppColors.primary),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Welcome Back !',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                      Obx(
+                        () => Text(
+                          controller.userName.value,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const Spacer(),
+                  IconButton(
+                    onPressed: () {},
+                    icon: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: AppColors.surface,
+                        shape: BoxShape.circle,
+                        border: Border.all(color: AppColors.border),
+                      ),
+                      child: const Icon(
+                        Icons.notifications_none_outlined,
+                        size: 20,
+                        color: AppColors.primary,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
+              const Text(
+                'Overview',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              const SizedBox(height: 16),
+              // Card 1: All Program (Green solid)
+              Obx(
+                () => OverviewCard(
+                  icon: Icons.school_outlined,
+                  count: '${controller.allProgramsCount.value}',
+                  label: 'All Program',
+                  backgroundColor: AppColors.primary,
+                  textColor: Colors.white,
+                  iconColor: Colors.white,
+                ),
+              ),
+              const SizedBox(height: 12),
+              // Card 2: Enrolled Programs (Mint light with subtle green border)
+              Obx(
+                () => OverviewCard(
+                  icon: Icons.menu_book_outlined,
+                  count: '${controller.enrolledProgramsCount.value}',
+                  label: 'Enrolled Programs',
+                  backgroundColor: const Color(0xFFEDF9F1),
+                  textColor: const Color(0xFF0F172A),
+                  iconColor: AppColors.primary,
+                  borderColor: const Color(0xFFBCE7C6),
+                ),
+              ),
+              const SizedBox(height: 12),
+              // Card 3: Completed Programs (Mint light with subtle green border)
+              Obx(
+                () => OverviewCard(
+                  icon: Icons.workspace_premium_outlined,
+                  count: '${controller.completedProgramsCount.value}',
+                  label: 'Completed Programs',
+                  backgroundColor: const Color(0xFFEDF9F1),
+                  textColor: const Color(0xFF0F172A),
+                  iconColor: AppColors.primary,
+                  borderColor: const Color(0xFFBCE7C6),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
