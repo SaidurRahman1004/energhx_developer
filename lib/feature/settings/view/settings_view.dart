@@ -158,7 +158,7 @@ class SettingsView extends GetView<SettingsController> {
                 width: double.infinity,
                 height: 50,
                 child: OutlinedButton(
-                  onPressed: controller.logOut,
+                  onPressed: () => controller.showLogOutConfirmationDialog(context),
                   style: OutlinedButton.styleFrom(
                     side: const BorderSide(color: Color(0xFFFF4D4F), width: 1.2),
                     shape: RoundedRectangleBorder(

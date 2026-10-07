@@ -49,6 +49,8 @@ dependencies:
   path_provider: ^2.1.6
   pdf: ^3.12.0
   open_filex: ^4.7.0
+  country_picker: ^2.0.28
+  country_state_city: ^0.1.6
 
 dev_dependencies:
   flutter_test:

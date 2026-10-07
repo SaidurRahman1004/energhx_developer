@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:country_state_city/country_state_city.dart' as csc;
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -10,6 +11,7 @@ import '../../../core/widgets/custom_button.dart';
 import '../../../core/widgets/custom_text_field.dart';
 import '../../../core/widgets/dashed_border_container.dart';
 import '../controller/auth_controller.dart';
+import 'widgets/searchable_picker_bottom_sheet.dart';
 
 class SignUpView extends StatefulWidget {
   const SignUpView({super.key});
@@ -69,7 +71,7 @@ class _SignUpViewState extends State<SignUpView> {
                       label: 'First Name',
                       hintText: 'Enter your first name here',
                       controller: controller.firstNameController,
-                      validator: (v) => controller.validateRequired(v, 'First name'),
+                      validator: (v) => controller.validateName(v, 'First name'),
                     ),
                     SizedBox(height: 16.h),
 
@@ -78,7 +80,7 @@ class _SignUpViewState extends State<SignUpView> {
                       label: 'Last Name',
                       hintText: 'Enter your last name here',
                       controller: controller.lastNameController,
-                      validator: (v) => controller.validateRequired(v, 'Last name'),
+                      validator: (v) => controller.validateName(v, 'Last name'),
                     ),
                     SizedBox(height: 16.h),
 
@@ -100,13 +102,7 @@ class _SignUpViewState extends State<SignUpView> {
                     SizedBox(height: 16.h),
 
                     // 5. Sex (Dropdown)
-                    _buildDropdownField(
-                      label: 'Sex',
-                      hintText: 'Choose sex',
-                      rxValue: controller.selectedSex,
-                      options: const ['Choose sex', 'Male', 'Female', 'Other'],
-                      errorText: controller.sexError,
-                    ),
+                    _buildSexDropdownField(controller: controller),
                     SizedBox(height: 16.h),
 
                     // 6. Email
@@ -212,7 +208,7 @@ class _SignUpViewState extends State<SignUpView> {
 
                           return DashedBorderContainer(
                             height: 52.h,
-                            color: AppColors.border, // #A1A1A1
+                            color: AppColors.border,
                             borderRadius: 8.r,
                             backgroundColor: Colors.white,
                             onTap: controller.pickPhoto,
@@ -257,61 +253,74 @@ class _SignUpViewState extends State<SignUpView> {
                       label: 'Street Address',
                       hintText: 'Street address',
                       controller: controller.streetAddressController,
-                      validator: (v) => controller.validateRequired(v, 'Street address'),
+                      validator: controller.validateStreetAddress,
                     ),
                     SizedBox(height: 16.h),
 
-                    // 11. Country (Dropdown)
-                    _buildDropdownField(
-                      label: 'Country',
-                      hintText: 'Choose country',
-                      rxValue: controller.selectedCountry,
-                      options: const [
-                        'Choose country',
-                        'United States',
-                        'Canada',
-                        'United Kingdom',
-                        'Bangladesh',
-                        'Germany',
-                        'Australia'
-                      ],
-                      errorText: controller.countryError,
+                    // 11. Country (Searchable Bottom Sheet with flags & search)
+                    Obx(
+                      () => _buildSelectField(
+                        label: 'Country',
+                        hintText: 'Choose country',
+                        value: controller.selectedCountry.value == 'Choose country'
+                            ? null
+                            : controller.selectedCountry.value,
+                        leading: controller.selectedCountryFlag.value.isNotEmpty
+                            ? Text(
+                                controller.selectedCountryFlag.value,
+                                style: TextStyle(fontSize: 20.sp),
+                              )
+                            : null,
+                        isLoading: controller.isLoadingCountries.value,
+                        errorText: controller.countryError.value,
+                        onTap: () => _openCountryPicker(context, controller),
+                      ),
                     ),
                     SizedBox(height: 16.h),
 
-                    // 12. Province (Dropdown)
-                    _buildDropdownField(
-                      label: 'Province',
-                      hintText: 'Choose province',
-                      rxValue: controller.selectedProvince,
-                      options: const [
-                        'Choose province',
-                        'Ontario',
-                        'California',
-                        'Texas',
-                        'Dhaka',
-                        'Bavaria',
-                        'Queensland'
-                      ],
-                      errorText: controller.provinceError,
+                    // 12. Province / State / Division (Dynamic based on selected country)
+                    Obx(
+                      () => _buildSelectField(
+                        label: controller.regionLabel.value,
+                        hintText: controller.regionHint.value,
+                        value: (controller.selectedProvince.value ==
+                                    controller.regionHint.value ||
+                                controller.selectedProvince.value ==
+                                    'Choose province' ||
+                                controller.selectedProvince.value.isEmpty)
+                            ? null
+                            : controller.selectedProvince.value,
+                        isLoading: controller.isLoadingStates.value,
+                        errorText: controller.provinceError.value,
+                        onTap: () => _openProvincePicker(context, controller),
+                      ),
                     ),
                     SizedBox(height: 16.h),
 
-                    // 13. City
-                    CustomTextField(
-                      label: 'City',
-                      hintText: 'City',
-                      controller: controller.cityController,
-                      validator: (v) => controller.validateRequired(v, 'City'),
+                    // 13. City (Dropdown & Searchable Bottom Sheet based on Country/Province)
+                    Obx(
+                      () => _buildSelectField(
+                        label: 'City',
+                        hintText: 'Choose city',
+                        value: (controller.selectedCity.value == 'Choose city' ||
+                                controller.selectedCity.value.isEmpty)
+                            ? null
+                            : controller.selectedCity.value,
+                        isLoading: controller.isLoadingCities.value,
+                        errorText: controller.cityError.value,
+                        onTap: () => _openCityPicker(context, controller),
+                      ),
                     ),
                     SizedBox(height: 16.h),
 
-                    // 14. Postal Code
-                    CustomTextField(
-                      label: 'Postal Code',
-                      hintText: 'Postal code',
-                      controller: controller.postalCodeController,
-                      validator: (v) => controller.validateRequired(v, 'Postal code'),
+                    // 14. Postal Code (Dynamic label, hint & context-aware validation)
+                    Obx(
+                      () => CustomTextField(
+                        label: controller.postalCodeLabel.value,
+                        hintText: controller.postalCodeHint.value,
+                        controller: controller.postalCodeController,
+                        validator: controller.validatePostalCode,
+                      ),
                     ),
                   ],
                 ),
@@ -343,7 +352,6 @@ class _SignUpViewState extends State<SignUpView> {
                     ),
                     GestureDetector(
                       onTap: () {
-                        // Go back to Login cleanly
                         if (Get.previousRoute == AppRoutes.login) {
                           Get.back();
                         } else {
@@ -369,13 +377,133 @@ class _SignUpViewState extends State<SignUpView> {
     );
   }
 
-  Widget _buildDropdownField({
+  void _openCountryPicker(BuildContext context, AuthController controller) {
+    if (controller.allCountries.isEmpty && controller.isLoadingCountries.value) {
+      Get.snackbar(
+        'Loading Countries',
+        'Please wait while countries are loading...',
+        snackPosition: SnackPosition.BOTTOM,
+        margin: EdgeInsets.all(16.w),
+      );
+      return;
+    }
+
+    SearchablePickerBottomSheet.show<csc.Country>(
+      context: context,
+      title: 'Select Country',
+      searchHint: 'Search country by name or code...',
+      items: controller.allCountries.map((c) {
+        final isSelected = controller.selectedCountryCode.value == c.isoCode;
+        return PickerItem<csc.Country>(
+          data: c,
+          title: c.name,
+          subtitle: '${c.phoneCode} • ${c.isoCode}',
+          leading: Text(c.flag, style: TextStyle(fontSize: 22.sp)),
+          isSelected: isSelected,
+        );
+      }).toList(),
+      onSelected: (c) => controller.selectCountry(c),
+    );
+  }
+
+  void _openProvincePicker(BuildContext context, AuthController controller) {
+    if (controller.selectedCountryCode.value.isEmpty) {
+      Get.snackbar(
+        'Select Country First',
+        'Please select a country before choosing ${controller.regionLabel.value.toLowerCase()}',
+        backgroundColor: Colors.amber.shade700,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,
+        margin: EdgeInsets.all(16.w),
+      );
+      return;
+    }
+
+    if (controller.isLoadingStates.value) {
+      Get.snackbar(
+        'Loading',
+        'Loading regions, please wait...',
+        snackPosition: SnackPosition.BOTTOM,
+        margin: EdgeInsets.all(16.w),
+      );
+      return;
+    }
+
+    SearchablePickerBottomSheet.show<csc.State>(
+      context: context,
+      title: 'Select ${controller.regionLabel.value}',
+      searchHint: 'Search ${controller.regionLabel.value.toLowerCase()}...',
+      allowCustomEntry: true,
+      onCustomSelected: (customVal) => controller.selectCustomProvince(customVal),
+      items: controller.availableStates.map((s) {
+        final isSelected = controller.selectedProvince.value == s.name;
+        return PickerItem<csc.State>(
+          data: s,
+          title: s.name,
+          subtitle: s.isoCode.isNotEmpty ? 'Code: ${s.isoCode}' : null,
+          leading: const Icon(Icons.location_on_outlined, color: AppColors.primary),
+          isSelected: isSelected,
+        );
+      }).toList(),
+      onSelected: (s) => controller.selectProvince(s),
+    );
+  }
+
+  void _openCityPicker(BuildContext context, AuthController controller) {
+    if (controller.selectedCountryCode.value.isEmpty) {
+      Get.snackbar(
+        'Select Country First',
+        'Please select a country first',
+        backgroundColor: Colors.amber.shade700,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,
+        margin: EdgeInsets.all(16.w),
+      );
+      return;
+    }
+
+    if (controller.isLoadingCities.value) {
+      Get.snackbar(
+        'Loading',
+        'Loading cities, please wait...',
+        snackPosition: SnackPosition.BOTTOM,
+        margin: EdgeInsets.all(16.w),
+      );
+      return;
+    }
+
+    SearchablePickerBottomSheet.show<String>(
+      context: context,
+      title: 'Select City',
+      searchHint: 'Search or enter custom city...',
+      allowCustomEntry: true,
+      emptyMessage: 'No preset cities found. Enter custom city below.',
+      onCustomSelected: (customVal) => controller.selectCity(customVal),
+      items: controller.availableCities.map((cityName) {
+        final isSelected = controller.selectedCity.value == cityName;
+        return PickerItem<String>(
+          data: cityName,
+          title: cityName,
+          leading: const Icon(Icons.apartment_rounded, color: AppColors.primary),
+          isSelected: isSelected,
+        );
+      }).toList(),
+      onSelected: (cityName) => controller.selectCity(cityName),
+    );
+  }
+
+  Widget _buildSelectField({
     required String label,
     required String hintText,
-    required RxString rxValue,
-    required List<String> options,
-    RxnString? errorText,
+    String? value,
+    Widget? leading,
+    bool isLoading = false,
+    String? errorText,
+    required VoidCallback onTap,
   }) {
+    final hasError = errorText != null && errorText.isNotEmpty;
+    final hasValue = value != null && value.isNotEmpty;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -388,8 +516,95 @@ class _SignUpViewState extends State<SignUpView> {
           ),
         ),
         SizedBox(height: 8.h),
+        InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(8.r),
+          child: Container(
+            height: 52.h,
+            padding: EdgeInsets.symmetric(horizontal: 16.w),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(8.r),
+              border: Border.all(
+                color: hasError ? AppColors.error : AppColors.border,
+                width: hasError ? 1.2 : 1.0,
+              ),
+            ),
+            child: Row(
+              children: [
+                if (leading != null) ...[
+                  leading,
+                  SizedBox(width: 10.w),
+                ],
+                Expanded(
+                  child: Text(
+                    hasValue ? value : hintText,
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 14.sp,
+                      fontWeight: hasValue ? FontWeight.w500 : FontWeight.w400,
+                      color: hasValue ? AppColors.textPrimary : AppColors.textMuted,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                if (isLoading)
+                  SizedBox(
+                    width: 18.r,
+                    height: 18.r,
+                    child: const CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation(AppColors.primary),
+                    ),
+                  )
+                else
+                  Icon(
+                    Icons.keyboard_arrow_down_rounded,
+                    color: AppColors.textMuted,
+                    size: 24.sp,
+                  ),
+              ],
+            ),
+          ),
+        ),
+        if (hasError) ...[
+          SizedBox(height: 6.h),
+          Padding(
+            padding: EdgeInsets.only(left: 4.w),
+            child: Text(
+              errorText,
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 12.sp,
+                color: AppColors.error,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildSexDropdownField({
+    required AuthController controller,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Sex',
+          style: GoogleFonts.plusJakartaSans(
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w600,
+            color: AppColors.textPrimary,
+          ),
+        ),
+        SizedBox(height: 8.h),
         Obx(() {
-          final hasError = errorText?.value != null && errorText!.value!.isNotEmpty;
+          final hasError = controller.sexError.value != null &&
+              controller.sexError.value!.isNotEmpty;
+          final value = controller.selectedSex.value;
+
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -406,7 +621,7 @@ class _SignUpViewState extends State<SignUpView> {
                 ),
                 child: DropdownButtonHideUnderline(
                   child: DropdownButton<String>(
-                    value: rxValue.value,
+                    value: value,
                     isExpanded: true,
                     icon: const Icon(
                       Icons.keyboard_arrow_down_rounded,
@@ -416,21 +631,33 @@ class _SignUpViewState extends State<SignUpView> {
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 14.sp,
                       fontWeight: FontWeight.w500,
-                      color: rxValue.value == hintText
+                      color: value == 'Choose sex'
                           ? AppColors.textMuted
                           : AppColors.textPrimary,
                     ),
-                    items: options.map((option) {
-                      return DropdownMenuItem<String>(
-                        value: option,
-                        child: Text(option),
-                      );
-                    }).toList(),
+                    items: const [
+                      DropdownMenuItem(
+                        value: 'Choose sex',
+                        child: Text('Choose sex'),
+                      ),
+                      DropdownMenuItem(
+                        value: 'Male',
+                        child: Text('Male'),
+                      ),
+                      DropdownMenuItem(
+                        value: 'Female',
+                        child: Text('Female'),
+                      ),
+                      DropdownMenuItem(
+                        value: 'Other',
+                        child: Text('Other'),
+                      ),
+                    ],
                     onChanged: (newVal) {
                       if (newVal != null) {
-                        rxValue.value = newVal;
-                        if (errorText != null && newVal != hintText) {
-                          errorText.value = null;
+                        controller.selectedSex.value = newVal;
+                        if (newVal != 'Choose sex') {
+                          controller.sexError.value = null;
                         }
                       }
                     },
@@ -442,7 +669,7 @@ class _SignUpViewState extends State<SignUpView> {
                 Padding(
                   padding: EdgeInsets.only(left: 4.w),
                   child: Text(
-                    errorText.value ?? '',
+                    controller.sexError.value!,
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 12.sp,
                       color: AppColors.error,

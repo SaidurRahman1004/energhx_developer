@@ -19,6 +19,7 @@ class ServiceAgreementController extends GetxController {
 
   // Type Signature
   final typedSignatureController = TextEditingController(text: 'Zahirul Piash');
+  final typedSignatureText = 'Zahirul Piash'.obs;
   final isTypeNotEmpty = true.obs;
 
   // Upload Signature
@@ -44,12 +45,14 @@ class ServiceAgreementController extends GetxController {
     });
 
     typedSignatureController.addListener(() {
+      typedSignatureText.value = typedSignatureController.text;
       isTypeNotEmpty.value = typedSignatureController.text.trim().isNotEmpty;
     });
 
     legalNameController.addListener(() {
       if (selectedTab.value != 1 || typedSignatureController.text.isEmpty) {
         typedSignatureController.text = legalNameController.text;
+        typedSignatureText.value = legalNameController.text;
       }
     });
   }
@@ -70,7 +73,7 @@ class ServiceAgreementController extends GetxController {
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: const ColorScheme.light(
-              primary: Color(0xFF2DAD00),
+              primary: Color(0xFF22C55E),
               onPrimary: Colors.white,
               onSurface: Color(0xFF1E293B),
             ),
@@ -88,10 +91,6 @@ class ServiceAgreementController extends GetxController {
 
   void selectTab(int index) {
     selectedTab.value = index;
-    if (index == 2 && uploadedSignatureFile.value == null) {
-      // Prompt user to pick file if not already chosen
-      pickSignatureImage();
-    }
   }
 
   Future<void> pickSignatureImage() async {
@@ -121,6 +120,7 @@ class ServiceAgreementController extends GetxController {
       isDrawNotEmpty.value = false;
     } else if (selectedTab.value == 1) {
       typedSignatureController.clear();
+      typedSignatureText.value = '';
       isTypeNotEmpty.value = false;
     } else {
       uploadedSignatureFile.value = null;
@@ -133,7 +133,7 @@ class ServiceAgreementController extends GetxController {
       'Agreement Executed',
       'Your Service Agreement has been signed and recorded.',
       snackPosition: SnackPosition.BOTTOM,
-      backgroundColor: const Color(0xFF2DAD00),
+      backgroundColor: const Color(0xFF22C55E),
       colorText: Colors.white,
       margin: const EdgeInsets.all(16),
       duration: const Duration(seconds: 2),
